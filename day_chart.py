@@ -47,19 +47,19 @@ class StockChart:
         fromDate = self.CpCodeMgr.GetstockListedDate(self.stock_code)        
         count = 9999999
         #data_array_price_volume = [0, 1, 2, 3, 4, 5, 8]
-        data_array_price_volume = [0,1,2,3,4,5,6,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,37]
+        data_array_price_volume = [0,1,2,3,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,37]
 
         self.StockChart.SetInputValue(0, self.stock_code)  # 종목코드
         self.StockChart.SetInputValue(1, ord('1'))  # 갯수로 받기
         self.StockChart.SetInputValue(2, 0)  # 요청종료일
-        self.StockChart.SetInputValue(3, 20160217) #요청시작일
+        self.StockChart.SetInputValue(3, 20160219) #요청시작일
         self.StockChart.SetInputValue(5, data_array_price_volume) # 호출 데이터
         self.StockChart.SetInputValue(6, ord('D')) # 차트 구분 (분)
         self.StockChart.SetInputValue(7, peroid) # 분봉 단위
         self.StockChart.SetInputValue(9, ord('1'))  # 수정주가 사용
 
         raw_data_column = ('Date', 'Time', 'Open', 'High', 'Low', 'Close',
-        '전일대비','거래량','거래대금','누적체결매수수량','상장주식수','시가총액',
+        '전일대비','거래량','거래대금','상장주식수','시가총액',
         '외인주문한도수량','외인주문가능수량','외인현보유수량','외인현보유비율',
         '수정주가일자','수정주가비율','기관순매수','기관누적순매수','등락주선',
         '등락비율','예탁금','주식회전율','거래성립율','대비부호')
@@ -98,7 +98,7 @@ class StockChart:
         ## 데이터프레임 형태로 변환
         ## 다만 호출한 데이터를 그대로 쓰게되면 날짜가 최신 -> 옛날순으로 가므로 리버스해서 역순에서 정순을 바꿔준다.
         stock_raw_data = pd.DataFrame(receive_data, columns = ['Date', 'Open', 'High', 'Low', 'Close',
-        '전일대비','거래량','거래대금','누적체결매수수량','상장주식수','시가총액',
+        '전일대비','거래량','거래대금','상장주식수','시가총액',
         '외인주문한도수량','외인주문가능수량','외인현보유수량','외인현보유비율',
         '수정주가일자','수정주가비율','기관순매수','기관누적순매수','등락주선',
         '등락비율','예탁금','주식회전율','거래성립율','대비부호'])
@@ -118,8 +118,9 @@ class ExportDatabase:
         ## 분봉 데이터 저장(분단위 별로 나누어 저장)
         #kospi = self.CpCodeMgr.GetstockListByMarket(1) # 코스피
         #kosdaq = self.CpCodeMgr.GetstockListByMarket(2) # 코스닥
-        code_list = ['A005930'] 
-        #'A229200', 'A251340', 'A069500', 'A119200', 'A122630', 'A252670']
+        code_list = ['A006800','A004020','A035250','A019170','A161390','A032640','A002790','A271560',
+        'A011070','A069500','A139480','A000720','A071050','A003490','A021240',
+        'A034020','A006280','A000100','A088980','A267250','A010140','A011790','A008930','A000120','A029780']
 
         ## 분봉 데이터 저장(분단위 별로 나누어 저장)
         if type(self.peroid) is int:

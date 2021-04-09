@@ -145,6 +145,38 @@ jongmoc_jaemu_dataframe_past=jongmoc_jaemu_dataframe.copy() #과거분기용 재
 
 jongmoc_jaemu_dataframe_past.columns = col_list5 #변수명_P로 변경
 
+    
+#데이터 형식 변환 (9,999 -> 9999), float 타입으로 변환       
+for i in range(1,len(jongmoc_jaemu_dataframe.columns)-1):#결산년도, jaemu_key_date는 빼주기위한 범위
+    try:
+        jongmoc_jaemu_dataframe[jongmoc_jaemu_dataframe.columns[i]]=jongmoc_jaemu_dataframe[jongmoc_jaemu_dataframe.columns[i]].str.replace(",","")
+    except AttributeError as e:
+        print(jongmoc_jaemu_dataframe.columns[i]+" 형식 변환 에러")
+        
+    jongmoc_jaemu_dataframe[jongmoc_jaemu_dataframe.columns[i]]=jongmoc_jaemu_dataframe[jongmoc_jaemu_dataframe.columns[i]].astype(float)
+
+
+print("--------------------------")
+for i in range(1,len(jongmoc_jaemu_dataframe_past.columns)-1):
+    try:
+        jongmoc_jaemu_dataframe_past[jongmoc_jaemu_dataframe_past.columns[i]]=jongmoc_jaemu_dataframe_past[jongmoc_jaemu_dataframe_past.columns[i]].str.replace(",","")
+    except AttributeError as e:
+        print(jongmoc_jaemu_dataframe_past.columns[i]+" 형식 변환 에러")
+    
+    jongmoc_jaemu_dataframe_past[jongmoc_jaemu_dataframe_past.columns[i]]=jongmoc_jaemu_dataframe_past[jongmoc_jaemu_dataframe_past.columns[i]].astype(float)
+    
+    
+print("--------------------------")        
+for i in range(1,len(jongmoc_market_data.columns)-1):
+    try:
+        jongmoc_market_data[jongmoc_market_data.columns[i]]=jongmoc_market_data[jongmoc_market_data.columns[i]].str.replace(",","")
+    except AttributeError as e: 
+        print(jongmoc_market_data.columns[i]+" 형식 변환 에러")      
+
+    jongmoc_market_data[jongmoc_market_data.columns[i]]=jongmoc_market_data[jongmoc_market_data.columns[i]].astype(float)                                                                                                           
+
+
+print("--------------------------")
 
 #필요없어진 변수들 삭제
 del jongmoc_market_data['date']
@@ -158,14 +190,21 @@ del jongmoc_jaemu_dataframe_past['결산년도_P']
 #del jongmoc_jaemu_dataframe['jaemu_key_date_past']
 
 #key_date에 맞게 병합하고 엑셀로 저장
-result = pd.merge(jongmoc_30min_dataframe, jongmoc_day_dataframe, on='key_date',how="outer")
-result2 = pd.merge(result, jongmoc_sub_dataframe, on='key_date',how="outer")
-result3 = pd.merge(result2, jongmoc_market_data, on='key_date',how="outer")
-result4 = pd.merge(result3, jongmoc_jaemu_dataframe, on = 'jaemu_key_date', how = "outer")
-result5 = pd.merge(result4, jongmoc_jaemu_dataframe_past, on = 'jaemu_key_date_past', how = "outer")
+result = pd.merge(jongmoc_30min_dataframe, jongmoc_day_dataframe, on='key_date',how="left")
+result2 = pd.merge(result, jongmoc_sub_dataframe, on='key_date',how="left")
+result3 = pd.merge(result2, jongmoc_market_data, on='key_date',how="left")
+result4 = pd.merge(result3, jongmoc_jaemu_dataframe, on = 'jaemu_key_date', how = "left")
+result5 = pd.merge(result4, jongmoc_jaemu_dataframe_past, on = 'jaemu_key_date_past', how = "left")
 
 del result5['jaemu_key_date']
 del result5['jaemu_key_date_past']
 
+#재무제표 증감 계산
+for i in range(1,len(jongmoc_jaemu_dataframe.columns)-1):
+    result5[jongmoc_jaemu_dataframe.columns[i]+'_증감']=result5[jongmoc_jaemu_dataframe.columns[i]]-result5[jongmoc_jaemu_dataframe.columns[i]+'_P']
 
+#날짜 형식 정수로 변환    
+result5['key_date']=result5['key_date'].astype(int)
+
+#엑셀로 저장
 result5.to_excel('%s_merge.xlsx' % jongmoc, header=True, index=False, encoding='CP949')

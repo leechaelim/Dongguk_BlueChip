@@ -210,7 +210,7 @@ jaemu_csv_list=["A005930_삼성전자",
 for i in range(len(jongmoc_csv_list)):
     jongmoc = jongmoc_csv_list[i]
     jongmoc_jaemu = jaemu_csv_list[i]
-
+   
     #30분봉 테이블 가져오기
     con = sqlite3.connect(directory+"/kospi100_stock_data_30minute.db")
     cursor = con.cursor()
@@ -254,16 +254,16 @@ for i in range(len(jongmoc_csv_list)):
             '수정주가일자','수정주가비율','기관순매수','기관누적순매수','대비부호']
 
     col_list3=['Date','MA_5','MA_20','MA_60','SLOW_K','SLOW_D','MACD','MACD_SIGNAL',
-               'MACD_OSCILLATOR','RSI','RSI_SIGNAL','BWMACD','BWM_SIGNAL','BWM_OSCILLATOR',
-               'TSF','TSF_SIGNAL','ZigZag1','ZigZag2','Bol_UP','Bol_DOWN','Bol_MID',
-               'OBV','OBV_SIGNAL','VR','VR_SIGNAL']
+            'MACD_OSCILLATOR','RSI','RSI_SIGNAL','BWMACD','BWM_SIGNAL','BWM_OSCILLATOR',
+            'TSF','TSF_SIGNAL','ZigZag1','ZigZag2','Bol_UP','Bol_DOWN','Bol_MID',
+            'OBV','OBV_SIGNAL','VR','VR_SIGNAL']
 
     col_list4 = ['결산년도', '매출액', '영업이익', '당기순익','BPS','PER','PBR','EPS','부채율',
                 '유보율','매출증가','영업증가','영익률','유동비율','자기자본','자산증가','매출이익','ROA']
 
     col_list5 = ['결산년도_P', '매출액_P', '영업이익_P', '당기순익_P','BPS_P','PER_P','PBR_P','EPS_P','부채율_P',
                 '유보율_P','매출증가_P','영업증가_P','영익률_P','유동비율_P','자기자본_P','자산증가_P','매출이익_P','ROA_P',
-                 'jaemu_key_date_past']
+                'jaemu_key_date3']
 
     jongmoc_30min_dataframe.columns = col_list1
     jongmoc_day_dataframe.columns = col_list2
@@ -298,22 +298,49 @@ for i in range(len(jongmoc_csv_list)):
     jongmoc_market_data['key_date'] = key_date_mak
 
     #재무제표 결산 년도 형식을 8자리로 변환(20년09월(3Q)->20200931) 
-
+    #jaemu_date_list에 20200931를 str로 저장
     jaemu_date_list=[]
     for i in range(len(jongmoc_jaemu_dataframe)):
         jaemu_date_list.append('20'+str(jongmoc_jaemu_dataframe['결산년도'][i])[:2]
         +str(jongmoc_jaemu_dataframe['결산년도'][i])[3:5]+'31')
-
+    #    jaemu_date_list를 int로 변환
     for i in range(len(jaemu_date_list)):
         jaemu_date_list[i]=int(jaemu_date_list[i])
 
+
+    #일별 keydate를 복사, 비교용으로 쓰려고   
     day_date_list=[]
     for i in range(len(jongmoc_day_dataframe['key_date'])):
         day_date_list.append(int(jongmoc_day_dataframe['key_date'][i]))
+    #int형,결산년도를 숫자로만 바꾼값
+    jongmoc_jaemu_dataframe['jaemu_key_date2'] = jaemu_date_list
 
-    jongmoc_jaemu_dataframe['jaemu_key_date'] = jaemu_date_list
+    last_jaemu_date=jaemu_date_list[0]
 
-    #일별데이터에 재무제표와 합병할 수 있도록 jaemu_key_date를 생성
+    if(last_jaemu_date%10000<1231):
+        plus300=last_jaemu_date+300 #3달을 더해줌
+    elif(last_jaemu_date%10000==1231):
+        plus300=last_jaemu_date+9100 #년도 바꾸고, 3월로 바꿔줌
+
+    jaemu_date_list.insert(0,plus300)   
+
+
+    if(plus300%10000<1231):
+        plus600=plus300+300 #3달을 더해줌
+    elif(plus300%10000==1231):
+        plus600=plus300+9100 #년도 바꾸고, 3월로 바꿔줌
+
+    jaemu_date_list.insert(0,plus600)   
+
+    if(plus600%10000<1231):
+        plus900=plus600+300 #3달을 더해줌
+    elif(plus300%10000==1231):
+        plus900=plus600+9100 #년도 바꾸고, 3월로 바꿔줌
+
+    jaemu_date_list.insert(0,plus900)
+    #jongmoc_day_dataframe['jaemu_key_date_now'] = jaemu_key_date_now
+
+    #일별데이터에 재무제표와 합병할 수 있도록 직전 분기 jaemu_key_date_now를 생성
     jaemu_key_date=[]
 
     for i in range(len(day_date_list)):
@@ -325,14 +352,14 @@ for i in range(len(jongmoc_csv_list)):
                 a=0
         jaemu_key_date.append(a)
 
-    jongmoc_day_dataframe['jaemu_key_date'] = jaemu_key_date
+    jongmoc_day_dataframe['jaemu_key_date1'] = jaemu_key_date
 
-    #직전 분기 재무제표 병합용 jaemu_key_date_past 생성
-    jaemu_key_date_past=[]
+    #직전 분기 재무제표 병합용 jaemu_key_date2 생성
+    jaemu_key_date2=[]
 
-    for i in range(len(jaemu_key_date)):
+    for i in range(len(jongmoc_day_dataframe['jaemu_key_date1'])):
         raw=jaemu_key_date[i]
-
+        
         #20160331같은 raw를 331형식으로 바꿔서 직전 분기 도출
         if(raw%10000>331):
             a=raw-300 #3달을 빼 줌
@@ -340,24 +367,45 @@ for i in range(len(jongmoc_csv_list)):
             a=raw-9100 #년도 바꾸고, 12월로 바꿔줌
         else:
             a=0
+            
+        jaemu_key_date2.append(a)
+        
+    jongmoc_day_dataframe['jaemu_key_date2'] = jaemu_key_date2
 
-        jaemu_key_date_past.append(a)
 
-    jongmoc_day_dataframe['jaemu_key_date_past'] = jaemu_key_date_past
+    #직전의 직전 분기 재무제표 병합용 jaemu_key_date3 생성
+    jaemu_key_date3=[]
+
+    for i in range(len(jongmoc_day_dataframe['jaemu_key_date2'])):
+        raw=jaemu_key_date2[i]
+        
+        #20160331같은 raw를 331형식으로 바꿔서 직전 분기 도출
+        if(raw%10000>331):
+            a=raw-300 #3달을 빼 줌
+        elif(raw%10000==331):
+            a=raw-9100 #년도 바꾸고, 12월로 바꿔줌
+        else:
+            a=0
+            
+        jaemu_key_date3.append(a)
+        
+    jongmoc_day_dataframe['jaemu_key_date3'] = jaemu_key_date3
+
+
 
 
     jongmoc_jaemu_dataframe_past=jongmoc_jaemu_dataframe.copy() #과거분기용 재무데이터프레임 따로 생성
 
     jongmoc_jaemu_dataframe_past.columns = col_list5 #변수명_P로 변경
 
-
+        
     #데이터 형식 변환 (9,999 -> 9999), float 타입으로 변환       
     for i in range(1,len(jongmoc_jaemu_dataframe.columns)-1):#결산년도, jaemu_key_date는 빼주기위한 범위
         try:
             jongmoc_jaemu_dataframe[jongmoc_jaemu_dataframe.columns[i]]=jongmoc_jaemu_dataframe[jongmoc_jaemu_dataframe.columns[i]].str.replace(",","")
         except AttributeError as e:
             print(jongmoc_jaemu_dataframe.columns[i]+" 형식 변환 에러")
-
+            
         jongmoc_jaemu_dataframe[jongmoc_jaemu_dataframe.columns[i]]=jongmoc_jaemu_dataframe[jongmoc_jaemu_dataframe.columns[i]].astype(float)
 
 
@@ -367,10 +415,10 @@ for i in range(len(jongmoc_csv_list)):
             jongmoc_jaemu_dataframe_past[jongmoc_jaemu_dataframe_past.columns[i]]=jongmoc_jaemu_dataframe_past[jongmoc_jaemu_dataframe_past.columns[i]].str.replace(",","")
         except AttributeError as e:
             print(jongmoc_jaemu_dataframe_past.columns[i]+" 형식 변환 에러")
-
+        
         jongmoc_jaemu_dataframe_past[jongmoc_jaemu_dataframe_past.columns[i]]=jongmoc_jaemu_dataframe_past[jongmoc_jaemu_dataframe_past.columns[i]].astype(float)
-
-
+        
+        
     print("--------------------------")        
     for i in range(1,len(jongmoc_market_data.columns)-1):
         try:
@@ -390,19 +438,16 @@ for i in range(len(jongmoc_csv_list)):
     del jongmoc_sub_dataframe['Date']
     del jongmoc_jaemu_dataframe['결산년도']
     del jongmoc_jaemu_dataframe_past['결산년도_P']
-    #del jongmoc_day_dataframe['jaemu_key_date']
-    #del jongmoc_day_dataframe['jaemu_key_date_past']
-    #del jongmoc_jaemu_dataframe['jaemu_key_date_past']
 
     #key_date에 맞게 병합하고 엑셀로 저장
     result = pd.merge(jongmoc_30min_dataframe, jongmoc_day_dataframe, on='key_date',how="left")
     result2 = pd.merge(result, jongmoc_sub_dataframe, on='key_date',how="left")
     result3 = pd.merge(result2, jongmoc_market_data, on='key_date',how="left")
-    result4 = pd.merge(result3, jongmoc_jaemu_dataframe, on = 'jaemu_key_date', how = "left")
-    result5 = pd.merge(result4, jongmoc_jaemu_dataframe_past, on = 'jaemu_key_date_past', how = "left")
-
-    del result5['jaemu_key_date']
-    del result5['jaemu_key_date_past']
+    result4 = pd.merge(result3, jongmoc_jaemu_dataframe, on = 'jaemu_key_date2', how = "left")
+    result5 = pd.merge(result4, jongmoc_jaemu_dataframe_past, on = 'jaemu_key_date3', how = "left")
+    del result5['jaemu_key_date1']
+    del result5['jaemu_key_date2']
+    del result5['jaemu_key_date3']
 
     #재무제표 증감 계산
     for i in range(1,len(jongmoc_jaemu_dataframe.columns)-1):
@@ -411,5 +456,6 @@ for i in range(len(jongmoc_csv_list)):
     #날짜 형식 정수로 변환    
     result5['key_date']=result5['key_date'].astype(int)
 
-    #csv로 저장
+    #엑셀로 저장
     result5.to_csv('%s_merge.csv' % jongmoc, header=True, index=False, encoding='CP949')
+    print('%s 저장 완료'%jongmoc)

@@ -102,6 +102,7 @@ for i in range(len(jongmoc_jaemu_dataframe)):
 for i in range(len(jaemu_date_list)):
     jaemu_date_list[i]=int(jaemu_date_list[i])
 
+
 #일별 keydate를 복사, 비교용으로 쓰려고   
 day_date_list=[]
 for i in range(len(jongmoc_day_dataframe['key_date'])):
@@ -109,7 +110,29 @@ for i in range(len(jongmoc_day_dataframe['key_date'])):
 #int형,결산년도를 숫자로만 바꾼값
 jongmoc_jaemu_dataframe['jaemu_key_date2'] = jaemu_date_list
 
-    
+last_jaemu_date=jaemu_date_list[0]
+
+if(last_jaemu_date%10000<1231):
+    plus300=last_jaemu_date+300 #3달을 더해줌
+elif(last_jaemu_date%10000==1231):
+    plus300=last_jaemu_date+9100 #년도 바꾸고, 3월로 바꿔줌
+
+jaemu_date_list.insert(0,plus300)   
+
+
+if(plus300%10000<1231):
+    plus600=plus300+300 #3달을 더해줌
+elif(plus300%10000==1231):
+    plus600=plus300+9100 #년도 바꾸고, 3월로 바꿔줌
+
+jaemu_date_list.insert(0,plus600)   
+
+if(plus600%10000<1231):
+    plus900=plus600+300 #3달을 더해줌
+elif(plus300%10000==1231):
+    plus900=plus600+9100 #년도 바꾸고, 3월로 바꿔줌
+
+jaemu_date_list.insert(0,plus900)
 #jongmoc_day_dataframe['jaemu_key_date_now'] = jaemu_key_date_now
 
 #일별데이터에 재무제표와 합병할 수 있도록 직전 분기 jaemu_key_date_now를 생성
@@ -210,9 +233,6 @@ del jongmoc_day_dataframe['Date']
 del jongmoc_sub_dataframe['Date']
 del jongmoc_jaemu_dataframe['결산년도']
 del jongmoc_jaemu_dataframe_past['결산년도_P']
-#del jongmoc_day_dataframe['jaemu_key_date']
-#del jongmoc_day_dataframe['jaemu_key_date_past']
-#del jongmoc_jaemu_dataframe['jaemu_key_date_past']
 
 #key_date에 맞게 병합하고 엑셀로 저장
 result = pd.merge(jongmoc_30min_dataframe, jongmoc_day_dataframe, on='key_date',how="left")
@@ -220,9 +240,9 @@ result2 = pd.merge(result, jongmoc_sub_dataframe, on='key_date',how="left")
 result3 = pd.merge(result2, jongmoc_market_data, on='key_date',how="left")
 result4 = pd.merge(result3, jongmoc_jaemu_dataframe, on = 'jaemu_key_date2', how = "left")
 result5 = pd.merge(result4, jongmoc_jaemu_dataframe_past, on = 'jaemu_key_date3', how = "left")
-#del result5['jaemu_key_date1']
-#del result5['jaemu_key_date2']
-#del result5['jaemu_key_date_past3']
+del result5['jaemu_key_date1']
+del result5['jaemu_key_date2']
+del result5['jaemu_key_date3']
 
 #재무제표 증감 계산
 for i in range(1,len(jongmoc_jaemu_dataframe.columns)-1):

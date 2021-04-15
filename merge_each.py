@@ -1,10 +1,11 @@
 import sqlite3
 import pandas as pd
 
-#여기 각자 수정해서 쓰기~
+#여기 각자 수정해서 쓰기~, 재무재표는 FS폴더안에 모아둠
 directory = "C:/Users/chael/Untitled Folder/vs/SWdata"
-jongmoc = "A000100"
-jongmoc_jaemu = "A000100_유한양행"
+jongmoc = "A071050"
+jongmoc_jaemu = "A071050_한국금융지주"
+directory2 = "C:/Users/chael/Untitled Folder/vs/SWdata/FS/"
 
 #30분봉 테이블 가져오기
 con = sqlite3.connect(directory+"/kospi100_stock_data_30minute.db")
@@ -30,11 +31,14 @@ jongmoc_sub_data=cursor2.fetchall()
 jongmoc_sub_dataframe=pd.DataFrame(jongmoc_sub_data)
 
 #재무제표 가져오기
+"""
 con3 = sqlite3.connect(directory+"/kospi100_재무제표.db")
 cursor3 = con3.cursor()
 cursor3.execute("SELECT * FROM "+jongmoc_jaemu)
 jongmoc_jaemu_data=cursor3.fetchall()
 jongmoc_jaemu_dataframe=pd.DataFrame(jongmoc_jaemu_data)
+"""
+jongmoc_jaemu_dataframe = pd.read_csv(directory2+jongmoc_jaemu+'.csv',encoding='CP949')
 
 #외부지표 가져오기
 jongmoc_market_data = pd.read_csv(directory+'/international_환율,금,유가.csv',encoding='CP949')
@@ -53,17 +57,16 @@ col_list3=['Date','MA_5','MA_20','MA_60','SLOW_K','SLOW_D','MACD','MACD_SIGNAL',
            'TSF','TSF_SIGNAL','ZigZag1','ZigZag2','Bol_UP','Bol_DOWN','Bol_MID',
            'OBV','OBV_SIGNAL','VR','VR_SIGNAL']
 
-col_list4 = ['결산년도', '매출액', '영업이익', '당기순익','BPS','PER','PBR','EPS','부채율',
-            '유보율','매출증가','영업증가','영익률','유동비율','자기자본','자산증가','매출이익','ROA']
+#col_list4 = ['결산년도', '매출액', '영업이익', '당기순익','BPS','PER','PBR','EPS','부채율','유보율','매출증가','영익증가','영익률','유동비율','자기자본','자산증가','매출이익','ROA']
 
 col_list5 = ['결산년도_P', '매출액_P', '영업이익_P', '당기순익_P','BPS_P','PER_P','PBR_P','EPS_P','부채율_P',
-            '유보율_P','매출증가_P','영업증가_P','영익률_P','유동비율_P','자기자본_P','자산증가_P','매출이익_P','ROA_P',
+            '유보율_P','매출증가_P','영익증가_P','영익률_P','유동비율_P','자기자본_P','자산증가_P','매출이익_P','ROA_P',
              'jaemu_key_date3']
 
 jongmoc_30min_dataframe.columns = col_list1
 jongmoc_day_dataframe.columns = col_list2
 jongmoc_sub_dataframe.columns = col_list3
-jongmoc_jaemu_dataframe.columns = col_list4
+#jongmoc_jaemu_dataframe.columns = col_list4
 
 #병합 할 기준이 되는 key_date 만들기
 key_date_min=[]
@@ -252,4 +255,4 @@ for i in range(1,len(jongmoc_jaemu_dataframe.columns)-1):
 result5['key_date']=result5['key_date'].astype(int)
 
 #엑셀로 저장
-result5.to_csv('%s_merge.csv' % jongmoc, header=True, index=False, encoding='CP949')
+result5.to_csv('%s_merge_real.csv' % jongmoc, header=True, index=False, encoding='CP949')

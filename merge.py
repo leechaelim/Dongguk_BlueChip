@@ -1,119 +1,122 @@
-#v5 재무제표 증감
+#100종목 전처리
 import sqlite3
 import pandas as pd
 
 #여기는 각자 수정 필요
 directory = "C:/Users/chael/Untitled Folder/vs/SWdata"
+directory2 = "C:/Users/chael/Untitled Folder/vs/SWdata/FS/" #재무제표 csv있는 폴더
+directory3 = "C:/Users/chael/Untitled Folder/vs/SWdata/final/" #최종 저장할 폴더 미리 생성하고 경로 지정해야함
 
-jongmoc_csv_list=[    "A005930",
-                        "A000660",
-                        "A035420",
-                        "A005935",
-                        "A051910",
-                        "A005380",
-                        "A207940",
-                        "A035720",
-                        "A006400",
-                        "A068270",
-                        "A000270",
-                        "A005490",
-                        "A012330",
-                        "A066570",
-                        "A051900",
-                        "A028260",
-                        "A105560",
-                        "A036570",
-                        "A017670",
-                        "A096770",
-                        "A055550",
-                        "A034730",
-                        "A032830",
-                        "A003550",
-                        "A090430",
-                        "A015760",
-                        "A018260",
-                        "A009150",
-                        "A086790",
-                        "A003670",
-                        "A033780",
-                        "A251270",
-                        "A302440",
-                        "A011170",
-                        "A018880",
-                        "A011200",
-                        "A010950",
-                        "A000810",
-                        "A009830",
-                        "A326030",
-                        "A009540",
-                        "A034220",
-                        "A352820",
-                        "A010130",
-                        "A316140",
-                        "A086280",
-                        "A011780",
-                        "A030200",
-                        "A024110",
-                        "A097950",
-                        "A006800",
-                        "A004020",
-                        "A035250",
-                        "A019170",
-                        "A161390",
-                        "A032640",
-                        "A002790",
-                        "A271560",
-                        "A011070",
-                        "A069500",
-                        "A139480",
-                        "A000720",
-                        "A071050",
-                        "A003490",
-                        "A021240",
-                        "A034020",
-                        "A006280",
-                        "A000100",
-                        "A088980",
-                        "A267250",
-                        "A010140",
-                        "A011790",
-                        "A008930",
-                        "A000120",
-                        "A029780",
-                        "A180640",
-                        "A128940",
-                        "A028670",
-                        "A005387",
-                        "A006360",
-                        "A241560",
-                        "A078930",
-                        "A026960",
-                        "A047810",
-                        "A003410",
-                        "A004990",
-                        "A023530",
-                        "A008770",
-                        "A016360",
-                        "A204320",
-                        "A039490",
-                        "A285130",
-                        "A005830",
-                        "A336260",
-                        "A005940",
-                        "A012750",
-                        "A012510",
-                        "A008560",
-                        "A036460",
-                        "A007070"]
+jongmoc_csv_list=["A005930",
+                    "A000660",
+                    "A035420",
+                    #"A005935",보조지표 2개 없음 VR,VR_SIGNAL
+                    #"A051910",보조지표 2개 없음 VR,VR_SIGNAL
+                    "A005380",
+                    "A207940", #재무 3개
+                    #"A035720",보조지표 2개 없음 VR,VR_SIGNAL
+                    "A006400",
+                    "A068270",
+                    "A000270",
+                    "A005490",
+                    "A012330",
+                    "A066570",
+                    "A051900",
+                    "A028260",
+                    "A105560",
+                    "A036570",
+                    "A017670",
+                    "A096770",
+                    "A055550",
+                    "A034730",
+                    "A032830",
+                    "A003550",
+                    "A090430",
+                    "A015760",
+                    "A018260",
+                    "A009150",
+                    "A086790",
+                    "A003670",
+                    "A033780",
+                    "A251270", #재무5개
+                    #"A302440",보조 3개뿐
+                    "A011170",
+                    "A018880",
+                    "A011200",
+                    "A010950",
+                    "A000810",
+                    "A009830",
+                    "A326030",#재무 18개
+                    "A009540",
+                    "A034220",
+                    "A352820",#재무19개
+                    "A010130",
+                    "A316140",#재무18개
+                    "A086280",
+                    "A011780",
+                    "A030200",
+                    "A024110",
+                    "A097950",
+                    "A006800",
+                    "A004020",
+                    "A035250",
+                    "A019170",
+                    "A161390",
+                    "A032640",
+                    "A002790",
+                    "A271560",#재무
+                    "A011070",
+                    "A069500",
+                    "A139480",
+                    "A000720",
+                    "A071050",
+                    "A003490",
+                    "A021240",
+                    "A034020",
+                    "A006280",
+                    "A000100",
+                    "A088980",
+                    "A267250",#재무
+                    "A010140",
+                    "A011790",
+                    "A008930",
+                    "A000120",
+                    "A029780",
+                    "A180640",
+                    "A128940",
+                    "A028670",
+                    "A005387",
+                    "A006360",
+                    "A241560",#재무
+                    "A078930",
+                    "A026960",
+                    "A047810",
+                    "A003410",
+                    "A004990",
+                    "A023530",
+                    "A008770",
+                    "A016360",
+                    "A204320",
+                    "A039490",
+                    "A285130",#재무
+                    "A005830",
+                    "A336260",#재무
+                    "A005940",
+                    "A012750",
+                    "A012510",
+                    "A008560",
+                    "A036460",
+                    "A007070"]
+                        
 
 jaemu_csv_list=["A005930_삼성전자",
                 "A000660_SK하이닉스",
                 "A035420_NAVER",
-                "A005935_삼성전자우",
-                "A051910_LG화학",
+                #"A005935_삼성전자우",
+                #"A051910_LG화학",
                 "A005380_현대차",
                 "A207940_삼성바이오로직스",
-                "A035720_카카오",
+                #"A035720_카카오",
                 "A006400_삼성SDI",
                 "A068270_셀트리온",
                 "A000270_기아차",
@@ -137,8 +140,8 @@ jaemu_csv_list=["A005930_삼성전자",
                 "A086790_하나금융지주",
                 "A003670_포스코케미칼",
                 "A033780_KT&G",
-                "A251270_넷마블",
-                "A302440_SK바이오사이언스",
+                "A251270_넷마블",#재무 5개
+                #"A302440_SK바이오사이언스",
                 "A011170_롯데케미칼",
                 "A018880_한온시스템",
                 "A011200_HMM",
@@ -165,7 +168,7 @@ jaemu_csv_list=["A005930_삼성전자",
                 "A002790_아모레G",
                 "A271560_오리온",
                 "A011070_LG이노텍",
-                "A069500_KODEX 200",
+                "A069500_KODEX200",
                 "A139480_이마트",
                 "A000720_현대건설",
                 "A071050_한국금융지주",
@@ -206,11 +209,12 @@ jaemu_csv_list=["A005930_삼성전자",
                 "A008560_메리츠증권",
                 "A036460_한국가스공사",
                 "A007070_GS리테일"]
+                
 
-for i in range(len(jongmoc_csv_list)):
-    jongmoc = jongmoc_csv_list[i]
-    jongmoc_jaemu = jaemu_csv_list[i]
-   
+for n in range(len(jongmoc_csv_list)):
+    jongmoc = jongmoc_csv_list[n]
+    jongmoc_jaemu = jaemu_csv_list[n]
+
     #30분봉 테이블 가져오기
     con = sqlite3.connect(directory+"/kospi100_stock_data_30minute.db")
     cursor = con.cursor()
@@ -235,11 +239,14 @@ for i in range(len(jongmoc_csv_list)):
     jongmoc_sub_dataframe=pd.DataFrame(jongmoc_sub_data)
 
     #재무제표 가져오기
+    """
     con3 = sqlite3.connect(directory+"/kospi100_재무제표.db")
     cursor3 = con3.cursor()
     cursor3.execute("SELECT * FROM "+jongmoc_jaemu)
     jongmoc_jaemu_data=cursor3.fetchall()
     jongmoc_jaemu_dataframe=pd.DataFrame(jongmoc_jaemu_data)
+    """
+    jongmoc_jaemu_dataframe = pd.read_csv(directory2+jongmoc_jaemu+'.csv',encoding='CP949')
 
     #외부지표 가져오기
     jongmoc_market_data = pd.read_csv(directory+'/international_환율,금,유가.csv',encoding='CP949')
@@ -258,17 +265,16 @@ for i in range(len(jongmoc_csv_list)):
             'TSF','TSF_SIGNAL','ZigZag1','ZigZag2','Bol_UP','Bol_DOWN','Bol_MID',
             'OBV','OBV_SIGNAL','VR','VR_SIGNAL']
 
-    col_list4 = ['결산년도', '매출액', '영업이익', '당기순익','BPS','PER','PBR','EPS','부채율',
-                '유보율','매출증가','영업증가','영익률','유동비율','자기자본','자산증가','매출이익','ROA']
+    #col_list4 = ['결산년도', '매출액', '영업이익', '당기순익','BPS','PER','PBR','EPS','부채율','유보율','매출증가','영익증가','영익률','유동비율','자기자본','자산증가','매출이익','ROA']
 
     col_list5 = ['결산년도_P', '매출액_P', '영업이익_P', '당기순익_P','BPS_P','PER_P','PBR_P','EPS_P','부채율_P',
-                '유보율_P','매출증가_P','영업증가_P','영익률_P','유동비율_P','자기자본_P','자산증가_P','매출이익_P','ROA_P',
+                '유보율_P','매출증가_P','영익증가_P','영익률_P','유동비율_P','자기자본_P','자산증가_P','매출이익_P','ROA_P',
                 'jaemu_key_date3']
 
     jongmoc_30min_dataframe.columns = col_list1
     jongmoc_day_dataframe.columns = col_list2
     jongmoc_sub_dataframe.columns = col_list3
-    jongmoc_jaemu_dataframe.columns = col_list4
+    #jongmoc_jaemu_dataframe.columns = col_list4
 
     #병합 할 기준이 되는 key_date 만들기
     key_date_min=[]
@@ -452,10 +458,19 @@ for i in range(len(jongmoc_csv_list)):
     #재무제표 증감 계산
     for i in range(1,len(jongmoc_jaemu_dataframe.columns)-1):
         result5[jongmoc_jaemu_dataframe.columns[i]+'_증감']=result5[jongmoc_jaemu_dataframe.columns[i]]-result5[jongmoc_jaemu_dataframe.columns[i]+'_P']
+    
+    #Profit, Profit2, Volatility 증감 계산
+    result5['Profit']=result5['Close']-result5['Open']
+    result5['Volatility']=result5['High']-result5['Low']
+    result6=result5.copy()
+    result6.loc[result6['Profit']>=0,'Profit2']='1'
+    #result6.loc[result6['profit']==0,'profit2']='Zero'
+    result6.loc[result6['Profit']<0,'Profit2']='0'
 
     #날짜 형식 정수로 변환    
-    result5['key_date']=result5['key_date'].astype(int)
+    result6['key_date']=result6['key_date'].astype(int)
 
     #엑셀로 저장
-    result5.to_csv('%s_merge.csv' % jongmoc, header=True, index=False, encoding='CP949')
-    print('%s 저장 완료'%jongmoc)
+    result6.to_csv(directory3+'%s_merge.csv' % jongmoc, header=True, index=False, encoding='CP949')
+    print('%s 저장 완료-------------------------------------------'%jongmoc)
+    print(n)

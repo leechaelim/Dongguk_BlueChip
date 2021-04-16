@@ -3,9 +3,11 @@ import pandas as pd
 
 #여기 각자 수정해서 쓰기~, 재무재표는 FS폴더안에 모아둠
 directory = "C:/Users/chael/Untitled Folder/vs/SWdata"
-jongmoc = "A071050"
-jongmoc_jaemu = "A071050_한국금융지주"
-directory2 = "C:/Users/chael/Untitled Folder/vs/SWdata/FS/"
+jongmoc = "A000660"
+jongmoc_jaemu = "A000660_SK하이닉스"
+directory2 = "C:/Users/chael/Untitled Folder/vs/SWdata/FS/" #재무제표 csv있는 폴더
+directory3 = "C:/Users/chael/Untitled Folder/vs/SWdata/final/" #최종 저장할 폴더 미리 생성하고 경로 지정해야함
+
 
 #30분봉 테이블 가져오기
 con = sqlite3.connect(directory+"/kospi100_stock_data_30minute.db")
@@ -57,11 +59,13 @@ col_list3=['Date','MA_5','MA_20','MA_60','SLOW_K','SLOW_D','MACD','MACD_SIGNAL',
            'TSF','TSF_SIGNAL','ZigZag1','ZigZag2','Bol_UP','Bol_DOWN','Bol_MID',
            'OBV','OBV_SIGNAL','VR','VR_SIGNAL']
 
+
 #col_list4 = ['결산년도', '매출액', '영업이익', '당기순익','BPS','PER','PBR','EPS','부채율','유보율','매출증가','영익증가','영익률','유동비율','자기자본','자산증가','매출이익','ROA']
 
 col_list5 = ['결산년도_P', '매출액_P', '영업이익_P', '당기순익_P','BPS_P','PER_P','PBR_P','EPS_P','부채율_P',
             '유보율_P','매출증가_P','영익증가_P','영익률_P','유동비율_P','자기자본_P','자산증가_P','매출이익_P','ROA_P',
              'jaemu_key_date3']
+
 
 jongmoc_30min_dataframe.columns = col_list1
 jongmoc_day_dataframe.columns = col_list2
@@ -251,8 +255,19 @@ del result5['jaemu_key_date3']
 for i in range(1,len(jongmoc_jaemu_dataframe.columns)-1):
     result5[jongmoc_jaemu_dataframe.columns[i]+'_증감']=result5[jongmoc_jaemu_dataframe.columns[i]]-result5[jongmoc_jaemu_dataframe.columns[i]+'_P']
 
+
+#Profit, Profit2, Volatility 증감 계산
+result5['Profit']=result5['Close']-result5['Open']
+result5['Volatility']=result5['High']-result5['Low']
+result6=result5.copy()
+result6.loc[result6['Profit']>=0,'Profit2']='1'
+#result6.loc[result6['profit']==0,'profit2']='Zero'
+result6.loc[result6['Profit']<0,'Profit2']='0'
+
 #날짜 형식 정수로 변환    
-result5['key_date']=result5['key_date'].astype(int)
+result6['key_date']=result6['key_date'].astype(int)
 
 #엑셀로 저장
-result5.to_csv('%s_merge_real.csv' % jongmoc, header=True, index=False, encoding='CP949')
+result6.to_csv(directory3+'%s_merge.csv' % jongmoc, header=True, index=False, encoding='CP949')
+print('%s 저장 완료-------------------------------------------'%jongmoc)
+

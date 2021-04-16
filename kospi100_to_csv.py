@@ -80,6 +80,7 @@ class CMarketTotal():
         #codeList2 = g_objCodeMgr.GetStockListByMarket(2)  # 코스닥
         allcodelist = codeList
         print('전 종목 코드 %d, 거래소 %d' % (len(allcodelist), len(codeList)))
+
  
         objMarket = CpMarketEye()
         rqCodeList = []

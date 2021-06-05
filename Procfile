@@ -1,1 +1,1 @@
-web: voila --port=$PORT --no-browser --enable_nbextensions=True 87DASH.ipynb
+web: voila --port=$PORT --no-browser --enable_nbextensions=True notebooks/87DASH.ipynb

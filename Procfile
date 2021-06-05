@@ -1,1 +1,1 @@
-web: voila --port=$PORT --no-browser --enable_nbextensions=True 86DASH.ipynb
+web: voila --ExecutePreprocessor.timeout=180 --port=$PORT --no-browser --enable_nbextensions=True 86DASH.ipynb

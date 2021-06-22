@@ -1,0 +1,10 @@
+ipywidgets
+matplotlib
+pulp
+numpy
+pandas
+voila
+mpldatacursor
+tk
+xlrd
+openpyxl

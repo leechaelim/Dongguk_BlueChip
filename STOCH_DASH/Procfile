@@ -1,0 +1,1 @@
+web: voila --ExecutePreprocessor.timeout=180 --port=$PORT --no-browser --enable_nbextensions=True DGU_BLUECHIP_STOCKDASH.ipynb

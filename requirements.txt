@@ -1,0 +1,6 @@
+ipywidgets
+matplotlib
+pulp
+numpy
+pandas
+voila
